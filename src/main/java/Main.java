@@ -28,7 +28,6 @@ public class Main {
          byte[] request_api_key = inputStream.readNBytes(2);
          byte[] request_api_version = inputStream.readNBytes(2);
          short version = ByteBuffer.wrap(request_api_version).getShort();
-         System.out.printf(String.valueOf(version));
          byte[] correlation_id = inputStream.readNBytes(4);
          byte[] client_id = inputStream.readNBytes(4);
          byte[] TAG_BUFFER = inputStream.readNBytes(4);
