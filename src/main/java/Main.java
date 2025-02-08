@@ -27,7 +27,7 @@ public class Main {
          byte[] message_size = inputStream.readNBytes(4);
          byte[] request_api_key = inputStream.readNBytes(2);
          byte[] request_api_version = inputStream.readNBytes(2);
-         int version = ByteBuffer.wrap(request_api_version).getInt();
+         short version = ByteBuffer.wrap(request_api_version).getShort();
          System.out.printf(String.valueOf(version));
          byte[] correlation_id = inputStream.readNBytes(4);
          byte[] client_id = inputStream.readNBytes(4);
@@ -37,7 +37,7 @@ public class Main {
          outputStream.write(message_size);
          outputStream.write(correlation_id);
          if (version < 0 || version > 4) {
-             outputStream.write(35);
+             outputStream.write(new byte[]{0, 35});
          }
      } catch (IOException e) {
        System.out.println("IOException: " + e.getMessage());
