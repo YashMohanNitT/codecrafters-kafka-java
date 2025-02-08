@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,9 +21,18 @@ public class Main {
        serverSocket.setReuseAddress(true);
        // Wait for connection from client.
        clientSocket = serverSocket.accept();
-       OutputStream outputStream = clientSocket.getOutputStream();
-       outputStream.write(new byte[]{1, 2, 3, 4});
-       outputStream.write(new byte[]{0, 0, 0, 7});
+
+         InputStream inputStream = clientSocket.getInputStream();
+         byte[] message_size = inputStream.readNBytes(4);
+         byte[] request_api_key = inputStream.readNBytes(2);
+         byte[] request_api_version = inputStream.readNBytes(2);
+         byte[] correlation_id = inputStream.readNBytes(4);
+         byte[] client_id = inputStream.readNBytes(4);
+         byte[] TAG_BUFFER = inputStream.readNBytes(4);
+
+         OutputStream outputStream = clientSocket.getOutputStream();
+         outputStream.write(message_size);
+         outputStream.write(correlation_id);
      } catch (IOException e) {
        System.out.println("IOException: " + e.getMessage());
      } finally {
