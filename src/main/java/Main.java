@@ -1,9 +1,11 @@
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class Main {
   public static void main(String[] args){
@@ -23,21 +25,41 @@ public class Main {
        // Wait for connection from client.
        clientSocket = serverSocket.accept();
 
-         InputStream inputStream = clientSocket.getInputStream();
-         byte[] message_size = inputStream.readNBytes(4);
-         byte[] request_api_key = inputStream.readNBytes(2);
-         byte[] request_api_version = inputStream.readNBytes(2);
-         short version = ByteBuffer.wrap(request_api_version).getShort();
-         byte[] correlation_id = inputStream.readNBytes(4);
-         byte[] client_id = inputStream.readNBytes(4);
-         byte[] TAG_BUFFER = inputStream.readNBytes(4);
+       InputStream inputStream = clientSocket.getInputStream();
+       inputStream.readNBytes(4);
+       byte[] request_api_key = inputStream.readNBytes(2);
+       byte[] request_api_version = inputStream.readNBytes(2);
+       short version = ByteBuffer.wrap(request_api_version).getShort();
+       byte[] correlation_id = inputStream.readNBytes(4);
 
-         OutputStream outputStream = clientSocket.getOutputStream();
-         outputStream.write(message_size);
-         outputStream.write(correlation_id);
-         if (version < 0 || version > 4) {
-             outputStream.write(new byte[]{0, 35});
-         }
+       System.out.println(Arrays.toString(request_api_key));
+       System.out.println(Arrays.toString(request_api_version));
+       System.out.println(Arrays.toString(correlation_id));
+
+       OutputStream outputStream = clientSocket.getOutputStream();
+       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+       byteArrayOutputStream.write(correlation_id);
+       if (version < 0 || version > 4) {
+           byteArrayOutputStream.write(new byte[]{0, 35});
+       } else {
+           byteArrayOutputStream.write(new byte[]{0, 0});
+           byteArrayOutputStream.write(2);
+           byteArrayOutputStream.write(new byte[]{0, 18});
+           byteArrayOutputStream.write(new byte[]{0, 3});
+           byteArrayOutputStream.write(new byte[]{0, 4});
+           byteArrayOutputStream.write(0);
+           byteArrayOutputStream.write(new byte[]{0, 0, 0, 0});
+           byteArrayOutputStream.write(0);
+       }
+       int size = byteArrayOutputStream.size();
+       byte[] message_size = ByteBuffer.allocate(4).putInt(size).array();
+
+       System.out.println(Arrays.toString(message_size));
+       System.out.println(Arrays.toString(byteArrayOutputStream.toByteArray()));
+
+       outputStream.write(message_size);
+       outputStream.write(byteArrayOutputStream.toByteArray());
+       outputStream.flush();
      } catch (IOException e) {
        System.out.println("IOException: " + e.getMessage());
      } finally {
